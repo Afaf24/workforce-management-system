@@ -1,0 +1,94 @@
+erDiagram
+    USERS {
+        uuid Id PK
+        string Email
+        string PasswordHash
+        string Role
+        bool IsActive
+        string RefreshToken
+        datetime RefreshTokenExpiryTime
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    DEPARTMENTS {
+        uuid Id PK
+        string Name
+        string Description
+        uuid ManagerId FK
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    EMPLOYEES {
+        uuid Id PK
+        uuid UserId FK
+        string EmployeeCode
+        string FirstName
+        string LastName
+        string PhoneNumber
+        string JobTitle
+        uuid DepartmentId FK
+        uuid ManagerId FK
+        date HireDate
+        decimal Salary
+        date DateOfBirth
+        string Address
+        string ProfileImageUrl
+        bool IsActive
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    ATTENDANCES {
+        uuid Id PK
+        uuid EmployeeId FK
+        date Date
+        datetime ClockIn
+        datetime ClockOut
+        string Status
+        decimal WorkedHours
+        string Notes
+    }
+
+    LEAVEREQUESTS {
+        uuid Id PK
+        uuid EmployeeId FK
+        string LeaveType
+        date StartDate
+        date EndDate
+        decimal TotalDays
+        string Reason
+        string Status
+        uuid ReviewedById FK
+        datetime ReviewedAt
+        string ReviewComment
+    }
+
+    LEAVEBALANCES {
+        uuid Id PK
+        uuid EmployeeId FK
+        string LeaveType
+        int Year
+        decimal TotalAllotted
+        decimal Used
+        decimal Remaining
+    }
+
+    AICONVERSATIONS {
+        uuid Id PK
+        uuid EmployeeId FK
+        text Question
+        text Answer
+        datetime CreatedAt
+    }
+
+    USERS ||--|| EMPLOYEES : "has profile"
+    DEPARTMENTS ||--o{ EMPLOYEES : "employs"
+    EMPLOYEES ||--o| DEPARTMENTS : "manages (optional)"
+    EMPLOYEES ||--o{ EMPLOYEES : "manages (self-ref)"
+    EMPLOYEES ||--o{ ATTENDANCES : "logs"
+    EMPLOYEES ||--o{ LEAVEREQUESTS : "submits"
+    EMPLOYEES ||--o{ LEAVEREQUESTS : "reviews (self-ref)"
+    EMPLOYEES ||--o{ LEAVEBALANCES : "owns"
+    EMPLOYEES ||--o{ AICONVERSATIONS : "asks"
