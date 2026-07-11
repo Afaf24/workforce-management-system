@@ -4,6 +4,7 @@ using HRSystem.Infrastructure;
 using HRSystem.Infrastructure.Persistence;
 using HRSystem.Infrastructure.Persistence.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -19,7 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// CORS — allows the Next.js frontend (typically http://localhost:3000) to call the API.
+// CORS — allows the Next.js frontend to call the API.
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:3000" };
 
@@ -101,7 +102,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Auto-apply migrations and seed demo data in Development only.
+    // Seed demo data in Development only.
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<HRSystemDbContext>();
     await DbSeeder.SeedAsync(dbContext);
@@ -117,12 +118,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// ---------------------------------------------------------------------------
+// Database Migrations Execution (Runs in Production & Development)
+// ---------------------------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<YourDbContextName>(); // Replace with your actual DbContext class name
+        var context = services.GetRequiredService<HRSystemDbContext>();
+        
+        // This line ensures any pending migrations are instantly pushed up onto Render's DB
         if (context.Database.GetPendingMigrations().Any())
         {
             context.Database.Migrate();
