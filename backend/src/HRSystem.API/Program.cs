@@ -94,6 +94,32 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // ---------------------------------------------------------------------------
+// Database Migrations & Initial Setup (Runs before pipeline executes)
+// ---------------------------------------------------------------------------
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<HRSystemDbContext>();
+        
+        // Force fully applying all schema migrations directly onto your live database
+        context.Database.Migrate();
+
+        // Seed demo data in Development environment only
+        if (app.Environment.IsDevelopment())
+        {
+            await DbSeeder.SeedAsync(context);
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while setting up or migrating the database.");
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Middleware pipeline
 // ---------------------------------------------------------------------------
 
@@ -101,11 +127,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    // Seed demo data in Development only.
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<HRSystemDbContext>();
-    await DbSeeder.SeedAsync(dbContext);
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -118,28 +139,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// ---------------------------------------------------------------------------
-// Database Migrations Execution (Runs in Production & Development)
-// ---------------------------------------------------------------------------
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<HRSystemDbContext>();
-        
-        // This line ensures any pending migrations are instantly pushed up onto Render's DB
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            context.Database.Migrate();
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database.");
-    }
-}
 
 app.Run();
