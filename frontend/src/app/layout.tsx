@@ -3,8 +3,8 @@ import { AuthProvider } from "@/hooks/use-auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI-Powered HR Management System",
-  description: "Graduation project — HR management with an AI assistant.",
+  title: "AI-Powered WORKFORCE Management System",
+  description: "project — WORKFORC management with an AI assistant.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
