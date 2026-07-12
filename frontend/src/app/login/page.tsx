@@ -145,12 +145,12 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           <div className="mb-8">
-            <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4">HR SYSTEM</p>
+            <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4"> WMSYSTEM</p>
             <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-1">
               {mode === "signin" ? "Sign in." : "Create account."}
             </h1>
             <p className="text-gray-400 text-sm">
-              {mode === "signin" ? "Access your HR portal." : "Join your organization."}
+              {mode === "signin" ? "Access your WMS portal." : "Join your organization."}
             </p>
           </div>
 
