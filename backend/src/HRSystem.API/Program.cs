@@ -19,13 +19,9 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.WithOrigins(
-            "https://workforce-management-system-c6p4.vercel.app"
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod();
-    });
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
 });
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
@@ -103,11 +99,16 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("FrontendPolicy");
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Do NOT use HTTPS redirection on Render (it handles SSL termination)
+// app.UseHttpsRedirection();
+
+app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Run();
